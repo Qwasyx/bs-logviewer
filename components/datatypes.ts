@@ -84,12 +84,7 @@ export class LogEntry {
     );
   }
 
-  isDuplicateOf(previous: LogEntry[]): boolean {
-    return previous.some(
-      (o) =>
-        o.urgency === this.urgency &&
-        o.source === this.source &&
-        o.message === this.message
-    );
+  getDeduplicationKey(): string {
+    return `${this.urgency}#${this.source}#${this.message}`;
   }
 }

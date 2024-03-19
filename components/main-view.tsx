@@ -88,8 +88,16 @@ export const MainView: React.FC<MainViewProps> = ({
   sourceFilter,
 }) => {
   let [page, setPage] = useState<number>(1);
-
   const [displayEntries, setDisplayEntries] = useState<DisplayEntry[]>([]);
+  const [messageFilter, setMessageFilter] = useState<MessageFilter>(
+    new MessageFilter()
+  );
+
+  const rawFilteredEntries = useMemo(
+    () =>
+      entries.filter((entry) => entry.fitsFilter(sourceFilter, messageFilter)),
+    [entries, sourceFilter, messageFilter]
+  );
 
   useEffect(() => {
     const displayEntries: DisplayEntry[] = [];
@@ -114,14 +122,35 @@ export const MainView: React.FC<MainViewProps> = ({
       currentDuplicates = [];
     }
 
-    entries.forEach((entry, idx) => {
+    const recentDeduplicationKeys = new Map<string, number>();
+
+    rawFilteredEntries.forEach((entry, idx) => {
+      const deduplicationKey = entry.getDeduplicationKey();
+      let isDuplicate = false;
+      if (recentDeduplicationKeys.get(deduplicationKey)) {
+        // undefined or 0 is equivalent
+        isDuplicate = true;
+      }
+
+      recentDeduplicationKeys.set(
+        deduplicationKey,
+        (recentDeduplicationKeys.get(deduplicationKey) ?? 0) + 1
+      );
+
+      if (idx >= deduplicationContext) {
+        const oldestDeduplicationKey =
+          rawFilteredEntries[idx - deduplicationContext].getDeduplicationKey();
+        recentDeduplicationKeys.set(
+          oldestDeduplicationKey,
+          recentDeduplicationKeys.get(oldestDeduplicationKey)! - 1
+        );
+      }
+
       const dentry: DisplayEntry = {
         unique_id: -1,
         type: DisplayEntryType.ACTUAL_ENTRY,
         entry: entry,
-        duplicate: entry.isDuplicateOf(
-          entries.slice(Math.max(0, idx - deduplicationContext), idx)
-        ),
+        duplicate: isDuplicate,
         hidden: false,
       };
 
@@ -138,26 +167,20 @@ export const MainView: React.FC<MainViewProps> = ({
     displayEntries.forEach((dentry, idx) => (dentry.unique_id = idx));
 
     setDisplayEntries(displayEntries);
-  }, [entries]);
+  }, [rawFilteredEntries]);
 
-  const [messageFilter, setMessageFilter] = useState<MessageFilter>(
-    new MessageFilter()
-  );
-
-  const filteredEntries = useMemo(
+  const filteredDisplayEntries = useMemo(
     () =>
       displayEntries.filter((entry) => {
         if (entry.type !== DisplayEntryType.ACTUAL_ENTRY) {
           return true;
         }
-        return (
-          !entry.hidden && entry.entry!.fitsFilter(sourceFilter, messageFilter)
-        );
+        return !entry.hidden;
       }),
-    [displayEntries, sourceFilter, messageFilter]
+    [displayEntries]
   );
 
-  const pages = Math.ceil(filteredEntries.length / rowsPerPage);
+  const pages = Math.ceil(filteredDisplayEntries.length / rowsPerPage);
 
   page = Math.min(page, pages);
 
@@ -165,8 +188,8 @@ export const MainView: React.FC<MainViewProps> = ({
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
 
-    return filteredEntries.slice(start, end);
-  }, [page, filteredEntries]);
+    return filteredDisplayEntries.slice(start, end);
+  }, [page, filteredDisplayEntries]);
 
   const hideDuplicates = useCallback(
     (dentry: DisplayEntry) => {
@@ -279,7 +302,7 @@ export const MainView: React.FC<MainViewProps> = ({
   return (
     <Table
       aria-label="Content of the log file"
-      classNames={{ wrapper: "min-h-full" }}
+      classNames={{ wrapper: "min-h-full w-full" }}
       topContent={
         <Input
           isClearable
