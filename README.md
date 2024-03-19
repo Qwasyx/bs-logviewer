@@ -1,4 +1,4 @@
-# BeatSaber Log Viewer 🎵
+# BeatSaber Log Viewer ![BS Logviewer Logo](bs-logviewer/blob/master/public/favicon.ico)
 
 This is a simple web based log viewer for the game Beat Saber.
 
