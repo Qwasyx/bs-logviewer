@@ -53,6 +53,7 @@ export class LogEntry {
   message: string;
 
   cached_lower_message: string;
+  is_duplicate: any;
 
   constructor(line_number: number, line: string) {
     this.line_number = line_number;
@@ -80,6 +81,15 @@ export class LogEntry {
     return (
       sourceFilter.is_enabled(this.source, this.urgency) &&
       this.cached_lower_message.includes(messageFilter.substring)
+    );
+  }
+
+  isDuplicateOf(previous: LogEntry[]): boolean {
+    return previous.some(
+      (o) =>
+        o.urgency === this.urgency &&
+        o.source === this.source &&
+        o.message === this.message
     );
   }
 }
