@@ -11,20 +11,20 @@ export interface LogViewProps {
 }
 
 export const LogView: FC<LogViewProps> = ({ logfile }) => {
-  let entries = useMemo<LogEntry[]>(
+  const entries = useMemo<LogEntry[]>(
     () => logfile.split("\n").map((line, idx) => new LogEntry(idx + 1, line)),
     [logfile]
   );
 
-  let initialSourceFilter = useMemo<SourceFilter>(() => {
-    let sourceFilter = new SourceFilter();
+  const initialSourceFilter = useMemo<SourceFilter>(() => {
+    const sourceFilter = new SourceFilter();
     entries.forEach((entry) =>
       sourceFilter.ensure_exists(entry.source, entry.urgency)
     );
     return sourceFilter;
   }, [entries]);
 
-  let [sourceFilter, setSourceFilter] =
+  const [sourceFilter, setSourceFilter] =
     useState<SourceFilter>(initialSourceFilter);
 
   return (
