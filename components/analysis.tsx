@@ -1,7 +1,7 @@
 "use client";
 
 import { LogEntry } from "@/components/datatypes";
-import { FC, useMemo } from "react";
+import { FC, useEffect, useMemo } from "react";
 import {
   Card,
   CardBody,
@@ -14,6 +14,8 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
+import { useAsyncList } from "@react-stately/data";
+import { compareVersions } from "compare-versions";
 
 export interface AnalysisProps {
   entries: LogEntry[];
@@ -84,6 +86,50 @@ export const Analysis: FC<AnalysisProps> = ({ entries }) => {
     return [general, mods];
   }, [entries]);
 
+  const modList = useAsyncList({
+    async load({ signal }) {
+      return {
+        items: mods,
+      };
+    },
+    async sort({ items, sortDescriptor }) {
+      return {
+        items: items.sort((a, b) => {
+          const baseCmp = a.modName.localeCompare(b.modName);
+          let finalCmp = baseCmp;
+
+          if (sortDescriptor.column === "gameVersion") {
+            // only sort differing game versions, otherwise sort by mod name
+            if (a.gameVersion !== b.gameVersion) {
+              if (!a.gameVersion) {
+                finalCmp = 1;
+              } else if (!b.gameVersion) {
+                finalCmp = -1;
+              } else {
+                finalCmp = compareVersions(a.gameVersion, b.gameVersion);
+              }
+            }
+          }
+          if (sortDescriptor.direction === "descending") {
+            finalCmp *= -1;
+          }
+          return finalCmp;
+        }),
+      };
+    },
+    initialSortDescriptor: {
+      column: "modName",
+      direction: "ascending",
+    },
+    getKey: (item: ModInfo) => item.modInternalName,
+  });
+
+  // update mod list whenever the mods are changed (cannot have dependency on modList or it would lead to infinite rerendering)
+  useEffect(() => {
+    modList.reload();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mods]);
+
   return (
     <section className="flex flex-col items-start justify-center gap-6">
       <Card className="min-w-full">
@@ -114,13 +160,20 @@ export const Analysis: FC<AnalysisProps> = ({ entries }) => {
         </CardHeader>
         <Divider />
         <CardBody>
-          <Table>
+          <Table
+            sortDescriptor={modList.sortDescriptor}
+            onSortChange={modList.sort}
+          >
             <TableHeader>
-              <TableColumn>MOD</TableColumn>
-              <TableColumn>VERSION</TableColumn>
-              <TableColumn>GAME VERSION</TableColumn>
+              <TableColumn key="modName" allowsSorting>
+                MOD
+              </TableColumn>
+              <TableColumn key="modVersion">VERSION</TableColumn>
+              <TableColumn key="gameVersion" allowsSorting>
+                GAME VERSION
+              </TableColumn>
             </TableHeader>
-            <TableBody items={mods}>
+            <TableBody items={modList.items}>
               {(mod) => (
                 <TableRow key={mod.modInternalName}>
                   <TableCell>{mod.modName}</TableCell>
