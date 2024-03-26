@@ -106,7 +106,11 @@ export const Analysis: FC<AnalysisProps> = ({ entries }) => {
               } else if (!b.gameVersion) {
                 finalCmp = -1;
               } else {
-                finalCmp = compareVersions(a.gameVersion, b.gameVersion);
+                // deal with Beat Games non SemVar versions… (1.29.1_4575554838 really should not be a version number)
+                finalCmp = compareVersions(
+                  a.gameVersion.replace("_", "+"),
+                  b.gameVersion.replace("_", "+")
+                );
               }
             }
           }
