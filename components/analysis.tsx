@@ -62,12 +62,19 @@ export const Analysis: FC<AnalysisProps> = ({ entries }) => {
           general.gameVersion = gameVersion[1];
         }
       } else if (entry.source === "BS_Utils") {
-        const userInfoSteam = entry.message.match(
-          /UserInfo found: (.*?): (.*?) on Steam/
+        const userInfo = entry.message.match(
+          /UserInfo found: (.*?): (.*?) on (Steam|Oculus)/
         );
-        if (userInfoSteam) {
-          general.platform = "Steam";
-          general.user = `${userInfoSteam[2]} (${userInfoSteam[1]})`;
+        if (userInfo) {
+          general.platform = userInfo[3];
+          general.user = `${userInfo[2]} (${userInfo[1]})`;
+        }
+
+        const invalidUserInfo = entry.message.match(
+          /Error retrieving UserInfo: UserInfo is null/
+        );
+        if (invalidUserInfo) {
+          general.user = "No UserInfo found!";
         }
       }
     }
