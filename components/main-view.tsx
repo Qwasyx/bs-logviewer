@@ -238,6 +238,7 @@ export const MainView: React.FC<MainViewProps> = ({
                     "break-all":
                       columnKey == ColumnKeys.SOURCE ||
                       columnKey == ColumnKeys.MESSAGE,
+                    "min-w-40": columnKey == ColumnKeys.SOURCE,
                     "text-default-400": dentry.duplicate,
                   })}
                 >
