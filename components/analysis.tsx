@@ -182,7 +182,7 @@ export const Analysis: FC<AnalysisProps> = ({ entries }) => {
                 <TableRow key={mod.modInternalName}>
                   <TableCell>{mod.modName}</TableCell>
                   <TableCell>{mod.modVersion}</TableCell>
-                  <TableCell>{mod.gameVersion || "latest"}</TableCell>
+                  <TableCell>{mod.gameVersion || "N/A"}</TableCell>
                 </TableRow>
               )}
             </TableBody>
