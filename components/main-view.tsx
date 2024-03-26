@@ -235,6 +235,9 @@ export const MainView: React.FC<MainViewProps> = ({
               const basic = (
                 <div
                   className={clsx(fontMono.className, {
+                    "break-all":
+                      columnKey == ColumnKeys.SOURCE ||
+                      columnKey == ColumnKeys.MESSAGE,
                     "text-default-400": dentry.duplicate,
                   })}
                 >
@@ -302,7 +305,6 @@ export const MainView: React.FC<MainViewProps> = ({
   return (
     <Table
       aria-label="Content of the log file"
-      classNames={{ wrapper: "min-h-full w-full" }}
       topContent={
         <Input
           isClearable
