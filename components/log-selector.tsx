@@ -9,6 +9,7 @@ import {
   Divider,
   Input,
 } from "@nextui-org/react";
+import { ungzip } from "pako";
 
 export interface LogSelectorProps {
   onLogOpen: (content: string) => void;
@@ -20,11 +21,25 @@ export const LogSelector: React.FC<LogSelectorProps> = ({ onLogOpen }) => {
 
   function processFile(file: File) {
     const reader = new FileReader();
-    reader.onload = (e) => {
-      const text = e.target?.result;
-      if (text) onLogOpen(text.toString());
-    };
-    reader.readAsText(file);
+    if (file.name.endsWith(".log.gz")) {
+      reader.onload = (e) => {
+        const data = e.target?.result as ArrayBuffer;
+        if (data) {
+          const result = ungzip(data);
+          const textDecoder = new TextDecoder();
+          const text = textDecoder.decode(result);
+          onLogOpen(text);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    } else {
+      // assume raw text (aka .log)
+      reader.onload = (e) => {
+        const text = e.target?.result;
+        if (text) onLogOpen(text.toString());
+      };
+      reader.readAsText(file);
+    }
   }
 
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
@@ -88,7 +103,7 @@ export const LogSelector: React.FC<LogSelectorProps> = ({ onLogOpen }) => {
               ref={inputRef}
               type="file"
               onChange={handleFileChange}
-              accept=".log"
+              accept=".log,.log.gz"
             />
 
             <p>
