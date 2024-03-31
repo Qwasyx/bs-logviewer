@@ -163,10 +163,13 @@ export const Analysis: FC<AnalysisProps> = ({ entries }) => {
           <span className="text-large">Mods</span>
         </CardHeader>
         <Divider />
-        <CardBody>
+        <CardBody className="p-1">
           <Table
             sortDescriptor={modList.sortDescriptor}
             onSortChange={modList.sort}
+            classNames={{
+              wrapper: "p-1",
+            }}
           >
             <TableHeader>
               <TableColumn key="modName" allowsSorting>

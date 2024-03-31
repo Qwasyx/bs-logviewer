@@ -337,6 +337,10 @@ export const MainView: React.FC<MainViewProps> = ({
           />
         </div>
       }
+      classNames={{
+        wrapper: "p-3",
+        td: "px-1.5",
+      }}
     >
       <TableHeader columns={columns}>
         {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}

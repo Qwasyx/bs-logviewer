@@ -28,17 +28,17 @@ export const LogView: FC<LogViewProps> = ({ logfile }) => {
     useState<SourceFilter>(initialSourceFilter);
 
   return (
-    <section className="flex flex-row items-start justify-center gap-8 w-full">
-      <div className="basis-80 w-80">
+    <section className="flex flex-col 3xl:flex-row items-start justify-center gap-4 w-full h-full">
+      <div className="w-full 3xl:order-2 3xl:w-auto 3xl:grow">
+        <MainView entries={entries} sourceFilter={sourceFilter} />
+      </div>
+      <div className="w-full 3xl:order-1 3xl:basis-80 3xl:w-80">
         <SourceFilterComponent
           onFilterUpdate={setSourceFilter}
           filter={sourceFilter}
         />
       </div>
-      <div className="grow shrink">
-        <MainView entries={entries} sourceFilter={sourceFilter} />
-      </div>
-      <div className="basis-100 w-100">
+      <div className="w-full 3xl:order-3 3xl:basis-[30rem] 3xl:w-[30rem]">
         <Analysis entries={entries} />
       </div>
     </section>

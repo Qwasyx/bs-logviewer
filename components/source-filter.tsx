@@ -158,65 +158,66 @@ export const SourceFilterComponent: FC<SourceFilterProps> = ({
           </CardBody>
         </Card>
       </div>
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-row justify-stretch flex-wrap 3xl:flex-col 3xl:flex-nowrap gap-3">
         {Array.from(filter.enabled.entries())
           .toSorted(([a], [b]) => a.localeCompare(b))
           .map(([source, innerMap]) => (
-            <div key={source}>
-              <Card>
-                <CardHeader>
-                  <Checkbox
-                    isIndeterminate={!isConsistent(innerMap)}
-                    isSelected={getOverallValue(innerMap)}
-                    onValueChange={(new_value) => {
-                      let new_filter = filter.clone();
-                      Array.from(innerMap.keys()).forEach((urgency) =>
-                        new_filter.update(source, urgency, new_value)
-                      );
-                      onFilterUpdate(new_filter);
-                    }}
-                  />
-                  <span>{source}</span>
-                </CardHeader>
-                <CardBody>
-                  <CheckboxGroup
-                    orientation="horizontal"
-                    value={Array.from(innerMap.entries())
-                      .filter(([_, enabled]) => enabled)
-                      .map(([x]) => x)}
-                    onValueChange={(enabled_urgencies) => {
-                      let new_filter = filter.clone();
-                      Array.from(innerMap.keys()).forEach((urgency) =>
-                        new_filter.update(
-                          source,
-                          urgency,
-                          enabled_urgencies.find((x) => urgency === x)
-                            ? true
-                            : false
-                        )
-                      );
-                      onFilterUpdate(new_filter);
-                    }}
-                  >
-                    {Array.from(innerMap.entries())
-                      .toSorted(
-                        ([a], [b]) =>
-                          urgencyOrderMap[a.toLocaleLowerCase()] -
-                          urgencyOrderMap[b.toLocaleLowerCase()]
+            <Card
+              key={source}
+              className="basis-1/3 md:basis-1/4 xl:basis-1/5 grow"
+            >
+              <CardHeader>
+                <Checkbox
+                  isIndeterminate={!isConsistent(innerMap)}
+                  isSelected={getOverallValue(innerMap)}
+                  onValueChange={(new_value) => {
+                    let new_filter = filter.clone();
+                    Array.from(innerMap.keys()).forEach((urgency) =>
+                      new_filter.update(source, urgency, new_value)
+                    );
+                    onFilterUpdate(new_filter);
+                  }}
+                />
+                <span>{source}</span>
+              </CardHeader>
+              <CardBody>
+                <CheckboxGroup
+                  orientation="horizontal"
+                  value={Array.from(innerMap.entries())
+                    .filter(([_, enabled]) => enabled)
+                    .map(([x]) => x)}
+                  onValueChange={(enabled_urgencies) => {
+                    let new_filter = filter.clone();
+                    Array.from(innerMap.keys()).forEach((urgency) =>
+                      new_filter.update(
+                        source,
+                        urgency,
+                        enabled_urgencies.find((x) => urgency === x)
+                          ? true
+                          : false
                       )
-                      .map(([urgency, enabled]) => (
-                        <Checkbox
-                          value={urgency}
-                          key={urgency}
-                          isSelected={enabled}
-                        >
-                          <UrgencyIndicator urgency={urgency} />
-                        </Checkbox>
-                      ))}
-                  </CheckboxGroup>
-                </CardBody>
-              </Card>
-            </div>
+                    );
+                    onFilterUpdate(new_filter);
+                  }}
+                >
+                  {Array.from(innerMap.entries())
+                    .toSorted(
+                      ([a], [b]) =>
+                        urgencyOrderMap[a.toLocaleLowerCase()] -
+                        urgencyOrderMap[b.toLocaleLowerCase()]
+                    )
+                    .map(([urgency, enabled]) => (
+                      <Checkbox
+                        value={urgency}
+                        key={urgency}
+                        isSelected={enabled}
+                      >
+                        <UrgencyIndicator urgency={urgency} />
+                      </Checkbox>
+                    ))}
+                </CheckboxGroup>
+              </CardBody>
+            </Card>
           ))}
       </div>
     </section>
