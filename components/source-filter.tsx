@@ -1,6 +1,6 @@
 "use client";
 
-import { LogEntry, MessageFilter, SourceFilter } from "@/components/datatypes";
+import { SourceFilter } from "@/components/datatypes";
 import { FC, useCallback, useMemo } from "react";
 import {
   Card,

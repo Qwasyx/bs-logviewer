@@ -1,7 +1,7 @@
 "use client";
 
 import { MainView } from "@/components/main-view";
-import { LogEntry, MessageFilter, SourceFilter } from "@/components/datatypes";
+import { LogEntry, SourceFilter } from "@/components/datatypes";
 import { FC, useMemo, useState } from "react";
 import { SourceFilterComponent } from "./source-filter";
 import { Analysis } from "./analysis";

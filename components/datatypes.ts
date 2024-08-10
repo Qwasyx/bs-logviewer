@@ -1,5 +1,3 @@
-import { ChipProps } from "@nextui-org/react";
-
 export class SourceFilter {
   enabled: Map<string, Map<string, boolean>>;
 
