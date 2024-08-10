@@ -1,3 +1,5 @@
+import TypedLocalStore from "typed-local-store";
+
 export class SourceFilter {
   enabled: Map<string, Map<string, boolean>>;
 
@@ -86,3 +88,11 @@ export class LogEntry {
     return `${this.urgency}#${this.source}#${this.message}`;
   }
 }
+
+interface LocalStorageSchema {
+  pinned: string[];
+}
+
+export const typedLocalStorage = new TypedLocalStore<LocalStorageSchema>({
+  ignoreMissingStorage: true,
+});

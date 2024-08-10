@@ -1,15 +1,22 @@
 "use client";
 
-import { SourceFilter } from "@/components/datatypes";
-import { FC, useCallback, useMemo } from "react";
+import { SourceFilter, typedLocalStorage } from "@/components/datatypes";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import {
+  baseStyles,
   Card,
   CardBody,
   CardHeader,
   Checkbox,
   CheckboxGroup,
+  Chip,
 } from "@nextui-org/react";
 import { UrgencyIndicator } from "./urgency-indicator";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faThumbTack,
+  faThumbTackSlash,
+} from "@fortawesome/free-solid-svg-icons";
 
 export const urgencyOrderMap: Record<string, number> = {
   notice: 0,
@@ -109,6 +116,16 @@ export const SourceFilterComponent: FC<SourceFilterProps> = ({
     [filter]
   );
 
+  const [pinned, setPinned] = useState<Set<string>>(
+    new Set<string>(typedLocalStorage.getItem("pinned") || [])
+  );
+
+  useEffect(() => {
+    typedLocalStorage.setItem("pinned", Array.from(pinned));
+  }, [pinned]);
+
+  console.log(pinned);
+
   return (
     <section className="flex flex-col justify-center gap-6">
       <div>
@@ -160,7 +177,12 @@ export const SourceFilterComponent: FC<SourceFilterProps> = ({
       </div>
       <div className="flex flex-row justify-stretch flex-wrap 3xl:flex-col 3xl:flex-nowrap gap-3">
         {Array.from(filter.enabled.entries())
-          .toSorted(([a], [b]) => a.localeCompare(b))
+          .toSorted(([a], [b]) => {
+            if (pinned.has(a) != pinned.has(b)) {
+              return pinned.has(a) ? -1 : 1;
+            }
+            return a.localeCompare(b);
+          })
           .map(([source, innerMap]) => (
             <Card
               key={source}
@@ -179,6 +201,25 @@ export const SourceFilterComponent: FC<SourceFilterProps> = ({
                   }}
                 />
                 <span>{source}</span>
+                <Chip
+                  color={pinned.has(source) ? "success" : "default"}
+                  classNames={{
+                    base: "left-1 p-0",
+                    content: "p-1",
+                  }}
+                  onClick={() => {
+                    const new_pinned = new Set<string>(pinned);
+                    if (!pinned.has(source)) new_pinned.add(source);
+                    else new_pinned.delete(source);
+                    setPinned(new_pinned);
+                  }}
+                >
+                  {pinned.has(source) ? (
+                    <FontAwesomeIcon icon={faThumbTack} />
+                  ) : (
+                    <FontAwesomeIcon icon={faThumbTackSlash} />
+                  )}
+                </Chip>
               </CardHeader>
               <CardBody>
                 <CheckboxGroup
